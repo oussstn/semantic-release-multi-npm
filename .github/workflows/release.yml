@@ -5,20 +5,26 @@ name: Release
       - master
       - next
       - beta
-      - dev
       - "*.x"
+permissions:
+  contents: read # for checkout
 jobs:
   release:
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      pull-requests: write # to be able to comment on released pull requests
     name: release
     runs-on: ubuntu-latest
+    environment: basic
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3
         with:
           cache: npm
-          node-version: 16
-      - run: npm ci
-      - run: npx semantic-release
+          node-version: lts/*
+      - run: npm clean-install
+      - run: npm audit signatures
+      - run: npx semantic-release@21.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.SEMANTIC_RELEASE_BOT_NPM_TOKEN }}
